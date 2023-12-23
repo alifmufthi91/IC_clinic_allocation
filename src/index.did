@@ -1,0 +1,13 @@
+service: () -> {
+    allocatePatient: (nat64, nat64) -> (opt text);
+    checkAllocation: (nat64) -> (opt nat64) query;
+    checkinDoctor: (nat64) -> ();
+    checkoutDoctor: (nat64) -> (opt text);
+    getDoctors: () -> (vec record {id:nat64; name:text; is_available:bool}) query;
+    getPatients: () -> (vec record {id:nat64; age:nat8; name:text; blood_type:text; gender:text}) query;
+    nextPatient: (nat64) -> (opt text);
+    queueLength: (nat64) -> (nat64) query;
+    registerDoctor: (text) -> ();
+    registerPatient: (text, nat8, text, text) -> ();
+    registerRoom: (nat64) -> ();
+}
