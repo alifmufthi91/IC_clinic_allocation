@@ -1,4 +1,4 @@
-import { bool, Canister, nat, nat64, query, Record, StableBTreeMap, text, update, Void, Vec, nat8, Opt, AzleNull, None, AzleOpt, Some, AzleNat64 } from 'azle';
+import { bool, Canister, nat, nat64, query, Record, StableBTreeMap, text, update, Void, Vec, nat8, Opt, None, Some, AzleNat64 } from 'azle';
 
 // Defining record types for different entities
 
@@ -32,10 +32,6 @@ type RoomQueue = {
     [room_id: number]: number[];
 };
 
-type DoctorRoom = {
-    [doctor_id: number]: number;
-}
-
 // This is a global variable that is stored on the heap
 
 let patientStorage = StableBTreeMap<nat64, Patient>(0);
@@ -43,7 +39,6 @@ let doctorStorage = StableBTreeMap<nat64, Doctor>(1);
 let roomStorage = StableBTreeMap<nat64, Room>(2);
 
 let roomQueue: RoomQueue = {};
-let doctorRoom: DoctorRoom = {};
 
 export default Canister({
 
@@ -157,19 +152,22 @@ export default Canister({
     }),
 
     queueLength: query([nat64], nat64, (room_id) => {
+        const keys = Object.keys(roomQueue)
+        if (keys.length < 1) {
+            return BigInt(0)
+        }
         return BigInt(roomQueue[Number(room_id)].length)
     }),
 
     checkAllocation: query([nat64], Opt(nat64), (patient_id) => {
-        const queues = Object.values(roomQueue)
-        const keys = Object.keys(roomQueue)
-        const idx = queues.findIndex((queue) => {
-            return queue.includes(Number(patient_id))
-        })
-        if (idx >= 0) {
-            return Some(BigInt(keys[idx]))
+        const queues = Object.entries(roomQueue)
+        if (queues.length < 1) {
+            return None
         }
-        return None
+        const result = queues.find((queue) => {
+            return queue[1].includes(Number(patient_id))
+        })
+        return result ? Some(BigInt(result[0])) : None
     }),
 
 });
